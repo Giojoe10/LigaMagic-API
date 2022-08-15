@@ -16,23 +16,18 @@ public class Card{
     [JsonConstructor]
     public Card(string name){
         Name = name;
-        Console.WriteLine("card.Name on Card/Card: " + Name);
         Precos = GetPrices(Name);
     }
     
     public static Card CardFactory(string name){
-        Console.WriteLine("Name on Card/CardFactory: " +name);
         Card card = CardFromName(name);
         return card;
     }
 
     public static Card CardFromName(string name) {
-        Console.WriteLine("Name on Card/CardFrom Name: " +name);
         string? parsedName = ParseName(name);
-        Console.WriteLine("parsedName on Card/CardFrom Name: " + parsedName);
         var page = GetWebPage($"https://api.scryfall.com/cards/named?fuzzy={parsedName}").Result;
         var card = JsonSerializer.DeserializeAsync<Card>(page).Result;
-        Console.WriteLine("card.Name on Card/CardFromName: " + card.Name);
         if(card!=null){
             return card;
         }
@@ -46,7 +41,6 @@ public class Card{
             name = "Colossal Dreadmaw";
         }
         var parsedName = ParseName(name);
-        Console.WriteLine("parsedName on Card/GetPrices: " + parsedName);
 
         var stream = GetWebPage($"https://www.ligamagic.com.br/?view=cards/card&card={parsedName}").Result;
         if(stream is null){

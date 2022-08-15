@@ -10,7 +10,6 @@ namespace LigaMagicAPI.Services;
 public class LigaMagicAPIService{
    
     public static Card Get(string name){
-        Console.WriteLine("Name on LigaMagicAPIService/Get: " +name);
         return Card.CardFactory(name);
     }
 

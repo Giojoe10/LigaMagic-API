@@ -16,8 +16,7 @@ public class LigaMagicAPIController : ControllerBase{
         try{
             var card = LigaMagicAPIService.Get(name);
             return card;
-        }catch(Exception e){
-            Console.WriteLine(e);
+        }catch{
             return NotFound();
         }
     }
