@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using LigaMagicAPI.Models;
+using LigaMagicAPI.Services;
 
 namespace LigaMagicAPI.Controllers;
 
@@ -12,7 +13,11 @@ public class LigaMagicAPIController : ControllerBase{
 
     [HttpGet("{name}")]
     public ActionResult<Card> Get(string name){
-        return (new Card(name));
+        var card = LigaMagicAPIService.Get(name);
+        if(card is null){
+            return NotFound();
+        }
+        return card;
     }
 
 }
