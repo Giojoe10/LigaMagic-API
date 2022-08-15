@@ -39,7 +39,7 @@ public class Card{
         return new Card("Colossal Dreadmaw");
     }
 
-    public Dictionary<string, double> GetPrices(string name){
+    public Dictionary<string, double> GetPrices(string name){   
         Dictionary<string, double> prices = new Dictionary<string, double>();
 
         if(name is null){
@@ -90,6 +90,7 @@ public class Card{
 
     private static string? ParseName(string name)
     {
-        return name?.Trim().Replace(" ", "+").Replace("/", "%2F");
+        string parsedName = name.Trim().Replace("%20", " ").Replace("+", " ");
+        return parsedName?.Replace(" ", "+").Replace("/", "%2F");
     }
 }
