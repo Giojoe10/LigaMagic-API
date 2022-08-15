@@ -13,11 +13,13 @@ public class LigaMagicAPIController : ControllerBase{
 
     [HttpGet("{name}")]
     public ActionResult<Card> Get(string name){
-        var card = LigaMagicAPIService.Get(name);
-        if(card is null){
+        try{
+            var card = LigaMagicAPIService.Get(name);
+            return card;
+        }catch(Exception e){
+            Console.WriteLine(e);
             return NotFound();
         }
-        return card;
     }
 
 }

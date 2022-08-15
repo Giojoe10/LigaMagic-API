@@ -10,55 +10,43 @@ namespace LigaMagicAPI.Models;
 public class Card{
 
     [JsonPropertyName("name")]
-    public string? Name{get;private set;}
+    public string? Name{get;set;}
     public Dictionary<string, double>? Precos{get; private set;}
 
     [JsonConstructor]
     public Card(string name){
         Name = name;
-        Precos = GetPrices();
+        Console.WriteLine("card.Name on Card/Card: " + Name);
+        Precos = GetPrices(Name);
     }
     
     public static Card CardFactory(string name){
-        Card card = CardFromName(name).Result;
+        Console.WriteLine("Name on Card/CardFactory: " +name);
+        Card card = CardFromName(name);
         return card;
     }
 
-    public async static Task<Card> CardFromName(string name) {
+    public static Card CardFromName(string name) {
+        Console.WriteLine("Name on Card/CardFrom Name: " +name);
         string? parsedName = ParseName(name);
-        var page = await GetWebPage($"https://api.scryfall.com/cards/named?fuzzy={parsedName}");
-        var card = await JsonSerializer.DeserializeAsync<Card>(page);
+        Console.WriteLine("parsedName on Card/CardFrom Name: " + parsedName);
+        var page = GetWebPage($"https://api.scryfall.com/cards/named?fuzzy={parsedName}").Result;
+        var card = JsonSerializer.DeserializeAsync<Card>(page).Result;
+        Console.WriteLine("card.Name on Card/CardFromName: " + card.Name);
         if(card!=null){
             return card;
         }
         return new Card("Colossal Dreadmaw");
     }
 
-    public void PrintPrecos(){
-        if(Precos is null){
-            return;
-        }
-
-        Console.WriteLine($"Preços para {Name}");
-        foreach(var preco in Precos){
-                Console.WriteLine(preco.Key+": R$"+preco.Value);
-        }
-    }
-    
-    public double GetMenorPreco(){
-        if(Precos is null){
-            return -1;
-        }
-        return Precos.OrderBy(precoSet => precoSet.Value).First().Value;
-    }
-
-    public Dictionary<string, double> GetPrices(){
+    public Dictionary<string, double> GetPrices(string name){
         Dictionary<string, double> prices = new Dictionary<string, double>();
 
-        if(Name is null){
-            Name = "Colossal Dreadmaw";
+        if(name is null){
+            name = "Colossal Dreadmaw";
         }
-        var parsedName = ParseName(Name);
+        var parsedName = ParseName(name);
+        Console.WriteLine("parsedName on Card/GetPrices: " + parsedName);
 
         var stream = GetWebPage($"https://www.ligamagic.com.br/?view=cards/card&card={parsedName}").Result;
         if(stream is null){
@@ -102,6 +90,6 @@ public class Card{
 
     private static string? ParseName(string name)
     {
-        return name?.Split('/')[0].Trim().Replace(" ", "%20").Replace("/", "%2F");
+        return name?.Trim().Replace(" ", "+").Replace("/", "%2F");
     }
 }
