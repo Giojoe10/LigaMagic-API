@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using LigaMagicAPI.Models;
 using LigaMagicAPI.Services;
+using System.Diagnostics; 
 
 namespace LigaMagicAPI.Controllers;
 
@@ -16,7 +17,8 @@ public class LigaMagicAPIController : ControllerBase{
         try{
             var card = LigaMagicAPIService.Get(name);
             return card;
-        }catch{
+        }catch(Exception e){
+            Console.WriteLine(e);
             return NotFound();
         }
     }

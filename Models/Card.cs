@@ -2,8 +2,6 @@ using System.Net.Http.Headers;
 using Newtonsoft.Json.Linq;
 using System.Web;
 using System.Text.Json.Serialization;
-using System.Runtime.Serialization;
-using System.Collections.Generic;
 using System.Text.Json;
 namespace LigaMagicAPI.Models;
 
@@ -11,7 +9,23 @@ public class Card{
 
     [JsonPropertyName("name")]
     public string? Name{get;set;}
-    public Dictionary<string, double>? Precos{get; private set;}
+    //public Dictionary<string, double>? Precos{get; private set;}
+    public Dictionary<string, Dictionary<string, double>>? Precos{get;private set;}
+    private Dictionary<string, string> EXTRAS_KEYS{get;} = new Dictionary<string, string>{
+				{"2", "Foil"},
+				{"3", "Promo"},
+				{"5", "Pre-Release"},
+				{"7", "FNM"},
+				{"11", "DCI"},
+				{"13", "Textless"},
+				{"17", "Assinada"},
+				{"19", "Buy-a-Box"},
+				{"23", "Oversize"},
+				{"29", "Alterada"},
+				{"31", "Foil Etched"},
+				{"37", "Misprint"},
+				{"41", "Miscut"}				
+			};
 
     [JsonConstructor]
     public Card(string name){
@@ -34,22 +48,22 @@ public class Card{
         return new Card("Colossal Dreadmaw");
     }
 
-    public Dictionary<string, double> GetPrices(string name){   
-        Dictionary<string, double> prices = new Dictionary<string, double>();
+    public Dictionary<string, Dictionary<string,double>> GetPrices(string name){   
+        Dictionary<string, Dictionary<string,double>> prices = new Dictionary<string, Dictionary<string,double>>();
 
         if(name is null){
             name = "Colossal Dreadmaw";
         }
         var parsedName = ParseName(name);
 
-        var stream = GetWebPage($"https://www.ligamagic.com.br/?view=cards/card&card={parsedName}").Result;
+         var stream = GetWebPage($"https://www.ligamagic.com.br/?view=cards/card&card={parsedName}").Result;
         if(stream is null){
-            throw new Exception("Stream error while getting prices.");
+           throw new Exception("Stream error while getting prices.");
         }
         var reader = new StreamReader(stream);
         string data = reader.ReadToEnd();
         if(data==null){
-            return new Dictionary<string, double>{};
+            throw new Exception("Error loading LigaMagic's data");
         }
 
         var pos1 = data.IndexOf("var g_avgprice=");
@@ -64,8 +78,23 @@ public class Card{
             setName = HttpUtility.HtmlDecode(setName);
             var preco = set.Value?.Value<double>("precoMenor");
             
-            if(preco!=null && preco!=0){
-                prices[setName] = preco.Value;
+            var set_extras = (JObject?) set.Value?["extras"];
+
+            if(preco!=null && (preco!=0 || set_extras!=null)){
+                prices[setName] = new Dictionary<string, double>{{"Normal",preco.Value}};
+            }
+            
+            
+
+            if(set_extras!=null){
+                foreach(var extra in set_extras){
+                    var extra_object = (JObject?)extra.Value; 
+                    if(extra_object!=null){
+                       prices[setName][EXTRAS_KEYS[extra.Key]] = extra_object.Value<double>("precoMenor");
+                    }
+                }
+            }else{
+                Console.WriteLine("no extras?!");
             }
         }
 
