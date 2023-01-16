@@ -55,7 +55,11 @@ public class Card{
             name = "Colossal Dreadmaw";
         }
         var parsedName = ParseName(name);
-
+        System.Console.WriteLine(parsedName);
+        var pos1 = 0;
+        var pos2 = 0;
+        // I know, GoTo is usually bad, but it was the solution I found to do it without rewriting this as a function.
+        Adventure:
          var stream = GetWebPage($"https://www.ligamagic.com.br/?view=cards/card&card={parsedName}").Result;
         if(stream is null){
            throw new Exception("Stream error while getting prices.");
@@ -65,9 +69,14 @@ public class Card{
         if(data==null){
             throw new Exception("Error loading LigaMagic's data");
         }
-
-        var pos1 = data.IndexOf("var g_avgprice=");
-        var pos2 = data.IndexOf(";", pos1);
+        System.Console.WriteLine(data);
+        try{
+            pos1 = data.IndexOf("var g_avgprice=");
+            pos2 = data.IndexOf(";", pos1);
+        }catch(System.ArgumentOutOfRangeException){
+            parsedName = name.Replace(" ", "+");
+            goto Adventure;
+        }
         var range = data.Substring(pos1+16,pos2-pos1-17);
         var prices_json = JObject.Parse(range);
         var sets = prices_json.Children();
@@ -113,7 +122,7 @@ public class Card{
 
     private static string? ParseName(string name)
     {
-        string parsedName = name.Replace(' ', '+').Split('/')[0];
+        string parsedName = name.Replace(' ', '+').Split('/')[0].Trim();
         return parsedName;
     }
 }
