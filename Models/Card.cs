@@ -113,7 +113,7 @@ public class Card{
 
     private static string? ParseName(string name)
     {
-        string parsedName = name.Trim().Replace("%20", " ").Replace("+", " ");
-        return parsedName?.Replace(" ", "+").Replace("/", "%2F");
+        string parsedName = name.Replace(' ', '+').Split('/')[0];
+        return parsedName;
     }
 }
